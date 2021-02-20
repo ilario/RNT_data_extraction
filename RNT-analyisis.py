@@ -4,9 +4,12 @@ import pandas as pd
 import numpy as np
 import sys
 
+# Usage python3.X RNT-analyisis.py RNT_YYYYMM.pdf
+# Output analysis_RNT_YYYYMM.xlsx
+
 # Read PDF into list of DataFrame
 
-input=sys.argv[1]
+input=sys.argv[1] # Argument must be given as RNT_YYYYMM.pdf 
 
 dataframe = tabula.read_pdf(input, pages='all', multiple_tables=True, spreadsheet=True)
 workers = pd.read_excel('Trabajadores con relacion laboral y CAF.xls')
