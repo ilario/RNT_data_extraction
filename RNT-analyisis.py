@@ -11,7 +11,7 @@ import sys
 
 input=sys.argv[1] # Argument must be given as RNT_YYYYMM.pdf 
 
-dataframe = tabula.read_pdf(input, pages='all', multiple_tables=True, spreadsheet=True)
+dataframe = tabula.read_pdf(input, pages='all', multiple_tables=True, lattice=True)
 workers = pd.read_excel('Trabajadores con relacion laboral y CAF.xls')
 
 data=pd.DataFrame() # Dataframe with workers data
@@ -47,9 +47,9 @@ for i in np.arange(0,len(workers)):
     
     caf=workers["CAF"].loc[i] # Read the CAF of each worker
     
-    if len(data[data[2] == caf]) > 0: # To make sure the worker exists!
+    if len(data[data["C.A.F."] == caf]) > 0: # To make sure the worker exists!
 
-        num_to_clean=data[data[2] == caf].iloc[0,9] # Print the BASE DE CONTINGENCIAS COMUNE 
+        num_to_clean=data[data["C.A.F."] == caf].iloc[0,9] # Print the BASE DE CONTINGENCIAS COMUNE
         pos_r=num_to_clean.find('\r') # Clean its format
         base=float(num_to_clean[0:pos_r].replace(",",""))/100 # Convert it to a number
         
@@ -57,7 +57,7 @@ for i in np.arange(0,len(workers)):
         if base == 4070.1: 
             anual="> 48841.2" # Correct the annual value for the highest threshold.
         
-        if len(data[data[2] == caf]) > 1: # If there are two equivalent CAF, it must be checked manually.
+        if len(data[data["C.A.F."] == caf]) > 1: # If there are two equivalent CAF, it must be checked manually.
             obs="Double CAF, check manually!"
         else:
             obs=" "
