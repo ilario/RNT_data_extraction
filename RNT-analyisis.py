@@ -32,25 +32,21 @@ data = data.reset_index() # Important! The indexes are the original ones from th
 # Generate a dataframe which will be printed in the excel output file.
 
 id_workers=pd.DataFrame(np.zeros((len(workers),4)), columns = ["Nombre Completo", "CAF", "Base / €", "Anual / €"])
+days_in_the_month = max(pd.to_numeric(data["Días\rCoti."].str.replace(" D","")))
 
 for i in np.arange(0,len(workers)):
-    
     name_id=workers["Nombre Completo"].loc[i] # Read the name of each worker
-    
     #The following section is to generate the CAF automatically from workers' name, if needed
-    
     #comma_pos=name_id.find(',')
     #l_name=name_id[comma_pos+2]
     #l_surname_1=name_id[0:2]
     #space_pos=name_id.find(' ')
-
     #if space_pos != comma_pos + 1:
     #    l_surname_2=name_id[space_pos+1:space_pos+3]
     #    caf=l_surname_1+l_surname_2+l_name
     #else:
     #    caf=l_surname_1+"  "+l_name
     #    
-    
     caf=workers["CAF"].loc[i] # Read the CAF of each worker
     ipf=workers["IPF"].loc[i] # Read the IPF of each worker
     anual = ""
@@ -77,7 +73,7 @@ for i in np.arange(0,len(workers)):
         base=float(num_to_clean[0:pos_r].replace(",",""))/100 # Convert it to a number
         days = int(data["Días\rCoti."].iloc[index].replace(" D","")) # Take out the number of days from "30 D"
         daily = base / days
-        anual = daily * 365 # Get the annual value
+        anual = daily * days_in_the_month * 12 # Get the annual value
         if anual >= 48841.2: 
             anual="> 48841.2" # Correct the annual value for the highest threshold.
         
