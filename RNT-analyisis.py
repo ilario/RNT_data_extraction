@@ -28,7 +28,7 @@ for i in np.arange(0,len(dataframe)):
 
 data.dropna(subset = ["Días\rCoti."], inplace=True) # Drop lines which do not contain anything in the Dias Coti column
 data = data.loc[data["Días\rCoti."].str.contains("[0-9] D")] # The expected value is something like "30 D"
-
+data = data.reset_index() # Important! The indexes are the original ones from the single pages and need to be updated
 # Generate a dataframe which will be printed in the excel output file.
 
 id_workers=pd.DataFrame(np.zeros((len(workers),4)), columns = ["Nombre Completo", "CAF", "Base / €", "Anual / €"])
@@ -56,24 +56,30 @@ for i in np.arange(0,len(workers)):
     anual = ""
     base = ""
     num_to_clean = ""
-    if len(data[data["C.A.F."] == caf]) == 0: # To make sure the worker exists!
+    index = -1
+    indexes = data.index[data["C.A.F."] == caf].tolist() # Get the line number of the CAF matches
+   # print(data["C.A.F."] == caf)
+    if len(indexes) == 0: # To make sure the worker exists!
         base="CAF not found, check manually!" # The worker does not exists / its generated CAF is wrong.
-    elif len(data[data["C.A.F."] == caf]) == 1:
-        num_to_clean=data[data["C.A.F."] == caf].iloc[0,9] # Print the BASE DE CONTINGENCIAS COMUNE
+    elif len(indexes) == 1:
+        index = indexes[0]
     elif not isNaN(ipf): # More than one correspondency for one CAF and IPF exists
-        if len(data[data["I.P.F."] == ipf]) == 1: # One correspondency with IPF
-            num_to_clean=data[data["I.P.F."] == ipf].iloc[0,9] # Print the BASE DE CONTINGENCIAS COMUNE
+        indexes = data.index[data["I.P.F."] == ipf].tolist() # Get the line number of the IPF matches
+        if len(indexes) == 1: # One correspondency with IPF
+            index = indexes[0]
         else:
             base="CAF not found and IPF not found or duplicated, check manually!"
     else:
         base="Double CAF and missing IPF, check manually!"
-    if not len(num_to_clean) == 0: # Check that previous code filled the string
+    if index >= 0: # Check that previous code found the line
+        num_to_clean=data.iloc[index,10] # Print the BASE DE CONTINGENCIAS COMUNE
         pos_r=num_to_clean.find('\r') # Clean its format
         base=float(num_to_clean[0:pos_r].replace(",",""))/100 # Convert it to a number
-        anual=base*12 # Get the annual value
-        if base == 4070.1: 
+        days = int(data["Días\rCoti."].iloc[index].replace(" D","")) # Take out the number of days from "30 D"
+        daily = base / days
+        anual = daily * 365 # Get the annual value
+        if anual >= 48841.2: 
             anual="> 48841.2" # Correct the annual value for the highest threshold.
-        
         
     id_workers.iloc[i,:]=[name_id,caf,base,anual] # Print the values for the excel
 id_workers.to_excel("analysis_RNT_"+input[4:10]+".xlsx") # Generate the excel.
