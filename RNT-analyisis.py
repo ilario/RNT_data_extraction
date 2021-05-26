@@ -9,6 +9,9 @@ import sys
 
 # Read PDF into list of DataFrame
 
+def isNaN(string):
+    return string != string
+
 input=sys.argv[1] # Argument must be given as RNT_YYYYMM.pdf 
 
 dataframe = tabula.read_pdf(input, pages='all', multiple_tables=True, lattice=True)
@@ -22,10 +25,13 @@ for i in np.arange(0,len(dataframe)):
     if dataframe[i].shape[1] > 9:
         data_each=pd.DataFrame(dataframe[i])
         data=data.append(data_each)
-        
+
+data.dropna(subset = ["Días\rCoti."], inplace=True) # Drop lines which do not contain anything in the Dias Coti column
+data = data.loc[data["Días\rCoti."].str.contains("[0-9] D")] # The expected value is something like "30 D"
+
 # Generate a dataframe which will be printed in the excel output file.
 
-id_workers=pd.DataFrame(np.zeros((len(workers),5)), columns = ["Nombre Completo", "CAF", "Base / €", "Anual / €", "Observation"])
+id_workers=pd.DataFrame(np.zeros((len(workers),4)), columns = ["Nombre Completo", "CAF", "Base / €", "Anual / €"])
 
 for i in np.arange(0,len(workers)):
     
@@ -46,26 +52,28 @@ for i in np.arange(0,len(workers)):
     #    
     
     caf=workers["CAF"].loc[i] # Read the CAF of each worker
-    
-    if len(data[data["C.A.F."] == caf]) > 0: # To make sure the worker exists!
-
+    ipf=workers["IPF"].loc[i] # Read the IPF of each worker
+    anual = ""
+    base = ""
+    num_to_clean = ""
+    if len(data[data["C.A.F."] == caf]) == 0: # To make sure the worker exists!
+        base="CAF not found, check manually!" # The worker does not exists / its generated CAF is wrong.
+    elif len(data[data["C.A.F."] == caf]) == 1:
         num_to_clean=data[data["C.A.F."] == caf].iloc[0,9] # Print the BASE DE CONTINGENCIAS COMUNE
+    elif not isNaN(ipf): # More than one correspondency for one CAF and IPF exists
+        if len(data[data["I.P.F."] == ipf]) == 1: # One correspondency with IPF
+            num_to_clean=data[data["I.P.F."] == ipf].iloc[0,9] # Print the BASE DE CONTINGENCIAS COMUNE
+        else:
+            base="CAF not found and IPF not found or duplicated, check manually!"
+    else:
+        base="Double CAF and missing IPF, check manually!"
+    if not len(num_to_clean) == 0: # Check that previous code filled the string
         pos_r=num_to_clean.find('\r') # Clean its format
         base=float(num_to_clean[0:pos_r].replace(",",""))/100 # Convert it to a number
-        
         anual=base*12 # Get the annual value
         if base == 4070.1: 
             anual="> 48841.2" # Correct the annual value for the highest threshold.
         
-        if len(data[data["C.A.F."] == caf]) > 1: # If there are two equivalent CAF, it must be checked manually.
-            obs="Double CAF, check manually!"
-        else:
-            obs=" "
         
-    else:
-        base="Not found, check manually!" # The worker does not exists / its generated CAF is wrong.
-        anual=" "
-        obs=" "
-        
-    id_workers.iloc[i,:]=[name_id,caf,base,anual,obs] # Print the values for the excel
+    id_workers.iloc[i,:]=[name_id,caf,base,anual] # Print the values for the excel
 id_workers.to_excel("analysis_RNT_"+input[4:10]+".xlsx") # Generate the excel.
