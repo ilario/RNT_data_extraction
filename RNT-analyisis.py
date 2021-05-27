@@ -3,6 +3,7 @@ import tabula
 import pandas as pd
 import numpy as np
 import sys
+import os.path
 
 # Usage python3.X RNT-analyisis.py RNT_YYYYMM.pdf
 # Output analysis_RNT_YYYYMM.xlsx
@@ -12,10 +13,12 @@ import sys
 def isNaN(string):
     return string != string
 
-input=sys.argv[1] # Argument must be given as RNT_YYYYMM.pdf 
+input_RNT=sys.argv[1] # Argument must be given as RNT_YYYYMM.pdf
+input_workers=sys.argv[2]
 
-dataframe = tabula.read_pdf(input, pages='all', multiple_tables=True, lattice=True)
-workers = pd.read_excel('Trabajadores con relacion laboral y CAF.xls')
+dataframe = tabula.read_pdf(input_RNT, pages='all', multiple_tables=True, lattice=True)
+workers = pd.read_excel(input_workers)
+reference_period = os.path.basename(input_RNT)[4:10]
 
 data=pd.DataFrame() # Dataframe with workers data
 
@@ -24,18 +27,20 @@ data=pd.DataFrame() # Dataframe with workers data
 for i in np.arange(0,len(dataframe)):
     if dataframe[i].shape[1] > 9:
         data_each=pd.DataFrame(dataframe[i])
-        data=data.append(data_each)
+        data=data.append(data_each, sort=False)
 
 data.dropna(subset = ["Días\rCoti."], inplace=True) # Drop lines which do not contain anything in the Dias Coti column
 data = data.loc[data["Días\rCoti."].str.contains("[0-9] D")] # The expected value is something like "30 D"
 data = data.reset_index() # Important! The indexes are the original ones from the single pages and need to be updated
 # Generate a dataframe which will be printed in the excel output file.
 
-id_workers=pd.DataFrame(np.zeros((len(workers),4)), columns = ["Nombre Completo", "CAF", "Base / €", "Anual / €"])
-days_in_the_month = max(pd.to_numeric(data["Días\rCoti."].str.replace(" D","")))
+#id_workers=pd.DataFrame(np.zeros((len(workers),4)), columns = ["Nombre Completo", "CAF", "Base / €", "Anual / €"])
+workers[reference_period] = np.zeros((len(workers),1))
+days_in_the_month = 30 # seems they're always "30 D" but very randomly can be 31 for individuals
+#days_in_the_month = max(pd.to_numeric(data["Días\rCoti."].str.replace(" D","")))
 
 for i in np.arange(0,len(workers)):
-    name_id=workers["Nombre Completo"].loc[i] # Read the name of each worker
+    #name_id=workers["Nombre Completo"].loc[i] # Read the name of each worker
     #The following section is to generate the CAF automatically from workers' name, if needed
     #comma_pos=name_id.find(',')
     #l_name=name_id[comma_pos+2]
@@ -77,5 +82,6 @@ for i in np.arange(0,len(workers)):
         if anual >= 48841.2: 
             anual="> 48841.2" # Correct the annual value for the highest threshold.
         
-    id_workers.iloc[i,:]=[name_id,caf,base,anual] # Print the values for the excel
-id_workers.to_excel("analysis_RNT_"+input[4:10]+".xlsx") # Generate the excel.
+    #id_workers.iloc[i,:]=[name_id,caf,base,anual,0] # Print the values for the excel
+    workers.iloc[i, workers.columns.get_loc(reference_period)] = anual
+workers.to_excel("analysis_RNT_"+reference_period+".xlsx", index=False) # Generate the excel.
