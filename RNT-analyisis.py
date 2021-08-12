@@ -75,16 +75,17 @@ for i in np.arange(0,len(workers)):
     if index >= 0: # Check that previous code found the line
         num_to_clean=data.iloc[index,10] # Print the BASE DE CONTINGENCIAS COMUNE
         pos_r=num_to_clean.find('\r') # Clean its format
-        base=float(num_to_clean[0:pos_r].replace(",",""))/100 # Convert it to a number
+        num_clean = num_to_clean[0:pos_r]
+        base=int(num_clean.replace(",",""))/100 # Convert it to a number
         days = int(data["Días\rCoti."].iloc[index].replace(" D","")) # Take out the number of days from "30 D"
         daily = base / days
         anual = daily * days_in_the_month * 12 # Get the annual value
         if anual >= 48841.2: 
-            anual="> 48841.2" # Correct the annual value for the highest threshold.
-    for i in indexes:
-        all_indexes.append(i)
+            anual = "> 48841.2" # Correct the annual value for the highest threshold.
     #id_workers.iloc[i,:]=[name_id,caf,base,anual,0] # Print the values for the excel
     workers.iloc[i, workers.columns.get_loc(reference_period)] = anual
+    for j in indexes:
+        all_indexes.append(j)
 workers.to_excel("analysis_RNT_"+reference_period+".xlsx", index=False) # Generate the excel.
 data_residual = data.drop(index=all_indexes)
-print(data_residual)
+print(data_residual.dropna(subset=['C.A.F.']))
