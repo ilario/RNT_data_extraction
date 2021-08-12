@@ -38,7 +38,7 @@ data = data.reset_index() # Important! The indexes are the original ones from th
 workers[reference_period] = np.zeros((len(workers),1))
 days_in_the_month = 30 # seems they're always "30 D" but very randomly can be 31 for individuals
 #days_in_the_month = max(pd.to_numeric(data["Días\rCoti."].str.replace(" D","")))
-
+all_indexes = []
 for i in np.arange(0,len(workers)):
     #name_id=workers["Nombre Completo"].loc[i] # Read the name of each worker
     #The following section is to generate the CAF automatically from workers' name, if needed
@@ -81,7 +81,10 @@ for i in np.arange(0,len(workers)):
         anual = daily * days_in_the_month * 12 # Get the annual value
         if anual >= 48841.2: 
             anual="> 48841.2" # Correct the annual value for the highest threshold.
-        
+    for i in indexes:
+        all_indexes.append(i)
     #id_workers.iloc[i,:]=[name_id,caf,base,anual,0] # Print the values for the excel
     workers.iloc[i, workers.columns.get_loc(reference_period)] = anual
 workers.to_excel("analysis_RNT_"+reference_period+".xlsx", index=False) # Generate the excel.
+data_residual = data.drop(index=all_indexes)
+print(data_residual)
