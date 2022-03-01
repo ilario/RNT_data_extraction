@@ -58,20 +58,17 @@ for i in np.arange(0,len(workers)):
     base = ""
     num_to_clean = ""
     index = -1
-    indexes = data.index[data["C.A.F."] == caf].tolist() # Get the line number of the CAF matches
-   # print(data["C.A.F."] == caf)
-    if len(indexes) == 0: # To make sure the worker exists!
-        base="CAF not found, check manually!" # The worker does not exists / its generated CAF is wrong.
-    elif len(indexes) == 1:
-        index = indexes[0]
-    elif not isNaN(ipf): # More than one correspondency for one CAF and IPF exists
-        indexes = data.index[data["I.P.F."] == ipf].tolist() # Get the line number of the IPF matches
-        if len(indexes) == 1: # One correspondency with IPF
+    if not isNaN(ipf):
+        ipf = str(ipf)
+        indexes = data.index[data["I.P.F."] == ipf].tolist() # Get the line number of the CAF matches
+       # print(data["C.A.F."] == caf)
+        if len(indexes) == 1:
             index = indexes[0]
-        else:
-            base="CAF not found and IPF not found or duplicated, check manually!"
-    else:
-        base="Double CAF and missing IPF, check manually!"
+        elif len(indexes) > 1:
+            print("IPF " + str(ipf) + " found more than once, check manually! For now, considering the first value.")
+            index = indexes[0]
+    elif not isNaN(caf):
+        print("IPF not available in input for CAF " + caf + ", check manually!")
     if index >= 0: # Check that previous code found the line
         num_to_clean=data.iloc[index,10] # Print the BASE DE CONTINGENCIAS COMUNE
         pos_r=num_to_clean.find('\r') # Clean its format
@@ -88,4 +85,7 @@ for i in np.arange(0,len(workers)):
         all_indexes.append(j)
 workers.to_excel("analysis_RNT_"+reference_period+".xlsx", index=False) # Generate the excel.
 data_residual = data.drop(index=all_indexes)
-print(data_residual.dropna(subset=['C.A.F.']))
+data_residual_caf = data_residual.dropna(subset=['C.A.F.'])
+if len(data_residual_caf) > 0:
+    print(data_residual_caf)
+
