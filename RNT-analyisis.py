@@ -23,11 +23,12 @@ reference_period = os.path.basename(input_RNT)[4:10]
 data=pd.DataFrame() # Dataframe with workers data
 
 #Extract from the .pdf only the tables with the workers' data.
-
+lines_list = []
 for i in np.arange(0,len(dataframe)):
     if dataframe[i].shape[1] > 9:
-        data_each=pd.DataFrame(dataframe[i])
-        data=data.append(data_each, sort=False)
+        lines_list.append(i)
+dataframe_selectedlines = [dataframe[i] for i in lines_list]
+data=pd.concat(dataframe_selectedlines)#, sort=False)
 
 data.dropna(subset = ["Días\rCoti."], inplace=True) # Drop lines which do not contain anything in the Dias Coti column
 data = data.loc[data["Días\rCoti."].str.contains("[0-9] D")] # The expected value is something like "30 D"
