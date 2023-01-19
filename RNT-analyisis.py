@@ -73,7 +73,8 @@ for i in np.arange(0,len(workers)):
         num_to_clean=data.iloc[index,10] # Print the BASE DE CONTINGENCIAS COMUNE
         pos_r=num_to_clean.find('\r') # Clean its format
         num_clean = num_to_clean[0:pos_r]
-        base=int(num_clean.replace(",",""))/100 # Convert it to a number
+        # sometimes numbers are written like 2,041,67 and some others are 2.041,67
+        base=int(num_clean.replace(",","").replace(".",""))/100 # Convert it to a number
         days = int(data["Días\rCoti."].iloc[index].replace(" D","")) # Take out the number of days from "30 D"
         daily = base / days
         anual = daily * days_in_the_month * 12 # Get the annual value
@@ -87,5 +88,5 @@ workers.to_excel("analysis_RNT_"+reference_period+".xlsx", index=False) # Genera
 data_residual = data.drop(index=all_indexes)
 data_residual_caf = data_residual.dropna(subset=['C.A.F.'])
 if len(data_residual_caf) > 0:
-    print(data_residual_caf)
+    print(data_residual_caf[['I.P.F.','C.A.F.']])
 
