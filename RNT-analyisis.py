@@ -89,5 +89,5 @@ workers.to_excel("analysis_RNT_"+reference_period+".xlsx", index=False) # Genera
 data_residual = data.drop(index=all_indexes)
 data_residual_caf = data_residual.dropna(subset=['C.A.F.'])
 if len(data_residual_caf) > 0:
-    print(data_residual_caf[['I.P.F.','C.A.F.']])
+    print(data_residual_caf[['I.P.F.','C.A.F.']].sort_values('C.A.F.'))
 
