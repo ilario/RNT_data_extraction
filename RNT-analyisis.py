@@ -31,7 +31,8 @@ dataframe_selectedlines = [dataframe[i] for i in lines_list]
 data=pd.concat(dataframe_selectedlines)#, sort=False)
 
 data.dropna(subset = ["Días\rCoti."], inplace=True) # Drop lines which do not contain anything in the Dias Coti column
-data = data.loc[data["Días\rCoti."].str.contains("[0-9] D")] # The expected value is something like "30 D"
+# there could be lines with "0 D" when they are "COMPENSACION IT POR ACCID. TRABAJO"
+data = data.loc[data["Días\rCoti."].str.contains("^[1-3].* D")] # The expected value is something like "30 D"
 data = data.reset_index() # Important! The indexes are the original ones from the single pages and need to be updated
 # Generate a dataframe which will be printed in the excel output file.
 
@@ -68,8 +69,8 @@ for i in np.arange(0,len(workers)):
         elif len(indexes) > 1:
             print("IPF " + str(ipf) + " found more than once, check manually! For now, considering the first value.")
             index = indexes[0]
-    elif not isNaN(caf):
-        print("IPF not available in input for CAF " + caf + ", check manually!")
+    #elif not isNaN(caf):
+        #print("IPF not available in input for CAF " + caf + ", check manually!")
     if index >= 0: # Check that previous code found the line
         num_to_clean=data.iloc[index,10] # Print the BASE DE CONTINGENCIAS COMUNE
         pos_r=num_to_clean.find('\r') # Clean its format
