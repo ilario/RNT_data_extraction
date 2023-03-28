@@ -8,7 +8,7 @@ import numpy as np
 import sys
 import os.path
 
-# Usage python3.X RNT-analyisis.py RNT_YYYYMM.pdf
+# Usage python3.X RNT-analyisis.py RNT_YYYYMM.pdf input.xlsx
 # Output analysis_RNT_YYYYMM.xlsx
 
 # Read PDF into list of DataFrame
