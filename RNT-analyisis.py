@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+# pip install -U tabula-py
 # conda install -c conda-forge tabula-py
 import tabula
 import pandas as pd
