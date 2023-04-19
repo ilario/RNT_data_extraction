@@ -59,3 +59,29 @@ python3 RNT-analyisis.py RNTs/2022/RNT_202203.pdf  analysis_RNT_202202.xlsx
 ```
 
 where each command takes the output of the previous one and add a column for the newly processed RNT.
+
+## Running on example files
+
+In this repository, you can find an example of RNT PDF file here [RNT_202012.pdf](RNT_202012.pdf) and an example of initial XLSX file here [analysis_RNT_202011.xlsx](analysis_RNT_202011.xlsx).
+
+As you can see, the XLSX file has to have at least the IPF column. For convenience, we would recommend to have also columns like CAS, name, work position etc.
+
+In the RNT PDF you will see IPFs starting with 10, to which a DNI number follows; starting with 20, to which a passport number follows (usually temporary before getting a NIE); and 60, to which a NIE number follows.
+
+When you run the script launching:
+
+```
+python3 RNT-analyisis.py RNT_202012.pdf  analysis_RNT_202011.xlsx
+```
+
+A new file will be created, with the name `analysis_RNT_202012.xlsx`. In this file you will find all the content of the original XLSX file but also a new column with the yearly salary estimated from the content of the `RNT_202012.pdf` file. Using the example PDF, you will get wrong numbers, likely due to the censoring we performed on the PDF.
+
+Also you will get an output text like this:
+
+```
+        I.P.F. C.A.F.
+0  1099999999E  NULAS
+```
+
+This means that this worker exists in the PDF but has not been found in the XLSX file.
+
