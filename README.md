@@ -25,7 +25,14 @@ You will need to install the following additional packages:
 * tabula-py
 * openpyxl
 
-From Anaconda you can do that in a graphical way.
+From Anaconda you can do that in a graphical way:
+
+* open Anaconda Navigator
+* go to the Environments tab
+* click the Update Index... button
+* select "All" instead of "Installed" in the menu
+* search for the aforementioned packages and select them for the installation
+* click on Apply for installing them
 
 If you are not using Anaconda, you can install them with:
 
@@ -39,6 +46,20 @@ pip install -U openpyxl
 Just download the main file `RNT-analyisis.py` from this repository.
 
 ## Usage
+
+### Prerequisites
+
+A RNT file as PDF named as `RNT_YYYYMM.pdf` (for example `RNT_202305.pdf`) and a XLSX file with a column with IPFidentification codes from the workers (if some codes are missing, these data will not be looked for in the RNT PDF).
+
+### With graphical interface
+
+Just double click on the `RNT-analyisis.py` file.
+
+A prompt should ask you for the RNT PDF file. The RNT file has to be named like `RNT_YYYYMM.pdf` for example `RNT_202209.pdf`. Once chosen that, another prompt should ask you for the XLSX spreadsheet with the workers' data (IPF and name).
+
+A new file will be created with a name like `analysis_RNT_YYYYMM.xlsx` for example `analysis_RNT_202209.xlsx`.
+
+### With command line
 
 Execute the `RNT-analyisis.py` file providing as the first argument the PDF of the RNT and as a second argument a XLSX spreadsheet.
 
