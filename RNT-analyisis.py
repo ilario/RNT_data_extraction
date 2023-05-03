@@ -16,8 +16,19 @@ import os.path
 def isNaN(string):
     return string != string
 
-input_RNT=sys.argv[1] # Argument must be given as RNT_YYYYMM.pdf
-input_workers=sys.argv[2]
+if len(sys.argv) == 3:
+    input_RNT=sys.argv[1] # Argument must be given as RNT_YYYYMM.pdf
+    input_workers=sys.argv[2]
+else:
+    import tkinter as tk
+    from tkinter.filedialog import askopenfilename
+    # Create interface, hide main window, ask for file selection
+    root = tk.Tk()
+    #try to take the window to foreground
+    #root.focus_force()
+    input_RNT = askopenfilename(parent=root,filetypes=[("RNT PDF", ".pdf")],title='Choose the RNT PDF file')
+    input_workers = askopenfilename(parent=root,filetypes=[("XLSX spreadsheet", ".xlsx")],title='Choose the spreadsheet with the workers\' data')
+
 
 dataframe = tabula.read_pdf(input_RNT, pages='all', multiple_tables=True, lattice=True)
 workers = pd.read_excel(input_workers)
