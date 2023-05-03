@@ -32,7 +32,10 @@ else:
 
 dataframe = tabula.read_pdf(input_RNT, pages='all', multiple_tables=True, lattice=True)
 workers = pd.read_excel(input_workers)
-reference_period = os.path.basename(input_RNT)[4:10]
+
+input_RNT_basename = os.path.basename(input_RNT)
+assert len(input_RNT_basename) == 14, "RNT PDF file has to be named like RNT_YYYYMM.pdf"
+reference_period = input_RNT_basename[4:10]
 
 data=pd.DataFrame() # Dataframe with workers data
 
